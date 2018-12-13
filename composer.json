@@ -1,5 +1,5 @@
 {
-    "name": "51systems/doctrine-encrypt",
+    "name": "epsoftware/doctrine-odm-encrypt",
     "type": "library",
     "keywords": ["doctrine", "aes256", "encrypt", "decrypt"],
     "license": "MIT",
@@ -14,26 +14,18 @@
     },
     "autoload": {
         "psr-4": {
-            "DoctrineEncrypt\\": "src"
+            "Epsoftware\\Doctrine\\OMD\\Encrypt\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "DoctrineEncrypt\\Tests\\": "tests"
+            "Epsoftware\\Doctrine\\OMD\\Encrypt\\Tests\\": "tests"
         }
     },
     "authors": [
         {
-            "name": "Victor Melnik",
-            "email": "melnikvictorl@gmail.com"
-        },
-        {
-            "name": "Dustin Thomson",
-            "email": "dthomson@51systems.com"
-        },
-        {
-            "name": "Dries Vints",
-            "email": "dries.vints@gmail.com"
+            "name": "Everton de Paula",
+            "email": "everton.projetos@gmail.com"
         }
     ],
     "config": {

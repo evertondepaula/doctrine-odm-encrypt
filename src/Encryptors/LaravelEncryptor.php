@@ -1,6 +1,6 @@
 <?php
 
-namespace DoctrineEncrypt\Encryptors;
+namespace Epsoftware\Doctrine\OMD\Encrypt\Encryptors;
 
 use Illuminate\Contracts\Encryption\Encrypter;
 

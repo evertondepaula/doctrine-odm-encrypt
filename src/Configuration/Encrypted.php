@@ -1,11 +1,11 @@
 <?php
 
-namespace DoctrineEncrypt\Configuration;
+namespace Epsoftware\Doctrine\OMD\Encrypt\Configuration;
 
 /**
  * The Encrypted class handles the @Encrypted annotation.
  *
- * @author Victor Melnik <melnikvictorl@gmail.com>
+ * @author Everton de Paula <everton.projetos@gmail.com>
  * @Annotation
  */
 class Encrypted

@@ -1,11 +1,11 @@
 <?php
 
-namespace DoctrineEncrypt\Encryptors;
+namespace Epsoftware\Doctrine\OMD\Encrypt\Encryptors;
 
 /**
  * Encryptor interface for encryptors
  *
- * @author Victor Melnik <melnikvictorl@gmail.com>
+ * @author Everton de Paula <everton.projetos@gmail.com>
  */
 interface EncryptorInterface
 {
