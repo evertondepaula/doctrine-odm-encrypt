@@ -4,11 +4,11 @@ namespace DoctrineEncrypt\Subscribers;
 
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Event\PostFlushEventArgs;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
+use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
+use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
+use Doctrine\ODM\MongoDB\Event\PostFlushEventArgs;
+use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\Events;
 use DoctrineEncrypt\Configuration\Encrypted;
 use DoctrineEncrypt\Encryptors\EncryptorInterface;
 
@@ -75,19 +75,19 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      */
     public function onFlush(OnFlushEventArgs $args)
     {
-        $em = $args->getEntityManager();
-        $unitOfWork = $em->getUnitOfWork();
+        $dm = $args->getDocumentManager();
+        $unitOfWork = $dm->getUnitOfWork();
 
         $this->postFlushDecryptQueue = array();
 
-        foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {
-            $this->entityOnFlush($entity, $em);
-            $unitOfWork->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($entity)), $entity);
+        foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
+            $this->documentOnFlush($document, $dm);
+            $unitOfWork->recomputeSingleDocumentChangeSet($dm->getClassMetadata(get_class($document)), $document);
         }
 
-        foreach ($unitOfWork->getScheduledEntityUpdates() as $entity) {
-            $this->entityOnFlush($entity, $em);
-            $unitOfWork->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($entity)), $entity);
+        foreach ($unitOfWork->getScheduledEntityUpdates() as $document) {
+            $this->documentOnFlush($document, $dm);
+            $unitOfWork->recomputeSingleDocumentChangeSet($dm->getClassMetadata(get_class($document)), $document);
         }
     }
 
@@ -97,25 +97,25 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      *
      * @param object $entity
      */
-    private function entityOnFlush($entity, EntityManager $em)
+    private function documentOnFlush($document, DocumentManager $dm)
     {
-        $objId = spl_object_hash($entity);
+        $objId = spl_object_hash($document);
 
         $fields = array();
 
-        foreach ($this->getEncryptedFields($entity, $em) as $field) {
+        foreach ($this->getEncryptedFields($document, $dm) as $field) {
             $fields[$field->getName()] = array(
                 'field' => $field,
-                'value' => $field->getValue($entity),
+                'value' => $field->getValue($document),
             );
         }
 
         $this->postFlushDecryptQueue[$objId] = array(
-            'entity' => $entity,
-            'fields' => $fields,
+            'document' => $document,
+            'fields'   => $fields,
         );
 
-        $this->processFields($entity, $em);
+        $this->processFields($document, $dm);
     }
 
     /**
@@ -124,22 +124,22 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      */
     public function postFlush(PostFlushEventArgs $args)
     {
-        $unitOfWork = $args->getEntityManager()->getUnitOfWork();
+        $unitOfWork = $args->getDocumentManager()->getUnitOfWork();
 
         foreach ($this->postFlushDecryptQueue as $pair) {
             $fieldPairs = $pair['fields'];
-            $entity = $pair['entity'];
-            $oid = spl_object_hash($entity);
+            $document = $pair['document'];
+            $oid = spl_object_hash($document);
 
             foreach ($fieldPairs as $fieldPair) {
                 /** @var \ReflectionProperty $field */
                 $field = $fieldPair['field'];
 
-                $field->setValue($entity, $fieldPair['value']);
-                $unitOfWork->setOriginalEntityProperty($oid, $field->getName(), $fieldPair['value']);
+                $field->setValue($document, $fieldPair['value']);
+                $unitOfWork->setOriginalDocumentProperty($oid, $field->getName(), $fieldPair['value']);
             }
 
-            $this->addToDecodedRegistry($entity);
+            $this->addToDecodedRegistry($document);
         }
 
         $this->postFlushDecryptQueue = array();
@@ -151,12 +151,12 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      */
     public function postLoad(LifecycleEventArgs $args)
     {
-        $entity = $args->getEntity();
-        $em = $args->getEntityManager();
+        $document = $args->getDocument();
+        $dm = $args->getDocumentManager();
 
-        if (! $this->hasInDecodedRegistry($entity)) {
-            if ($this->processFields($entity, $em, false)) {
-                $this->addToDecodedRegistry($entity);
+        if (! $this->hasInDecodedRegistry($document)) {
+            if ($this->processFields($document, $dm, false)) {
+                $this->addToDecodedRegistry($document);
             }
         }
     }
@@ -185,28 +185,28 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     /**
      * Process (encrypt/decrypt) entities fields
      *
-     * @param object $entity Some doctrine entity
+     * @param object $document Some doctrine document
      */
-    private function processFields($entity, EntityManager $em, $isEncryptOperation = true): bool
+    private function processFields($document, DocumentManager $dm, $isEncryptOperation = true): bool
     {
-        $properties = $this->getEncryptedFields($entity, $em);
+        $properties = $this->getEncryptedFields($document, $dm);
 
-        $unitOfWork = $em->getUnitOfWork();
-        $oid = spl_object_hash($entity);
+        $unitOfWork = $dm->getUnitOfWork();
+        $oid = spl_object_hash($document);
 
         foreach ($properties as $refProperty) {
-            $value = $refProperty->getValue($entity);
+            $value = $refProperty->getValue($document);
             $value = $value === null ? '' : $value;
 
             $value = $isEncryptOperation ?
                 $this->encryptor->encrypt($value) :
                 $this->encryptor->decrypt($value);
 
-            $refProperty->setValue($entity, $value);
+            $refProperty->setValue($document, $value);
 
             if (! $isEncryptOperation) {
                 //we don't want the object to be dirty immediately after reading
-                $unitOfWork->setOriginalEntityProperty($oid, $refProperty->getName(), $value);
+                $unitOfWork->setOriginalDocumentProperty($oid, $refProperty->getName(), $value);
             }
         }
 
@@ -214,39 +214,39 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     }
 
     /**
-     * Check if we have entity in decoded registry
+     * Check if we have document in decoded registry
      *
-     * @param object $entity Some doctrine entity
+     * @param object $document Some doctrine document
      */
-    private function hasInDecodedRegistry($entity): bool
+    private function hasInDecodedRegistry($document): bool
     {
-        return isset($this->decodedRegistry[spl_object_hash($entity)]);
+        return isset($this->decodedRegistry[spl_object_hash($document)]);
     }
 
     /**
-     * Adds entity to decoded registry
+     * Adds document to decoded registry
      *
-     * @param object $entity Some doctrine entity
+     * @param object $document Some doctrine document
      */
-    private function addToDecodedRegistry($entity)
+    private function addToDecodedRegistry($document)
     {
-        $this->decodedRegistry[spl_object_hash($entity)] = true;
+        $this->decodedRegistry[spl_object_hash($document)] = true;
     }
 
 
     /**
-     * @param bool $entity
+     * @param bool $document
      * @return \ReflectionProperty[]
      */
-    private function getEncryptedFields($entity, EntityManager $em)
+    private function getEncryptedFields($document, DocumentManager $dm)
     {
-        $className = get_class($entity);
+        $className = get_class($document);
 
         if (isset($this->encryptedFieldCache[$className])) {
             return $this->encryptedFieldCache[$className];
         }
 
-        $meta = $em->getClassMetadata($className);
+        $meta = $dm->getClassMetadata($className);
 
         $encryptedFields = array();
 

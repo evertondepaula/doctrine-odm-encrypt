@@ -1,4 +1,4 @@
-# DoctrineEncrypt [![Build Status](https://travis-ci.org/51systems/doctrine-encrypt.svg?branch=master)](https://travis-ci.org/51systems/doctrine-encrypt)
+# DoctrineEncrypt (https://github.com/evertondepaula/doctrine-odm-encrypt)
 
 Package encrypts and decrypts Doctrine fields through life cycle events. This version of the Doctrine Encrypt package
 distinguishes itself with the following features:
@@ -50,25 +50,22 @@ $eventManager->addEventSubscriber($subscriber);
 
 namespace Your\Namespace;
 
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 use DoctrineEncrypt\Configuration\Encrypted;
 
 /**
- * @ORM\Entity
+ * @ODM\Document
  */
-class Entity
+class Document
 {
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     * @var int
-     */
+     * @ODM\Id
+    */
     private $id;
 
     /**
-     * @ORM\Column(type="text")
+     * @ODM\Field(type="string")
      * @Encrypted
      * @var string
      */
