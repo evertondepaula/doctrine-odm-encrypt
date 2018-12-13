@@ -73,10 +73,6 @@ class Document
 }
 ```
 
-## License
-
-This bundle is under [the MIT license](LICENSE.md).
-
 ## Versions
 
 I'm using Semantic Versioning like described [here](http://semver.org).
