@@ -1,6 +1,6 @@
 <?php
 
-namespace Epsoftware\Doctrine\OMD\Encrypt\Subscribers;
+namespace Epsoftware\Doctrine\ODM\Encrypt\Subscribers;
 
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\EventSubscriber;
@@ -9,8 +9,8 @@ use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
 use Doctrine\ODM\MongoDB\Event\PostFlushEventArgs;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Events;
-use Epsoftware\Doctrine\OMD\Encrypt\Configuration\Encrypted;
-use Epsoftware\Doctrine\OMD\Encrypt\Encryptors\EncryptorInterface;
+use Epsoftware\Doctrine\ODM\Encrypt\Configuration\Encrypted;
+use Epsoftware\Doctrine\ODM\Encrypt\Encryptors\EncryptorInterface;
 
 /**
  * Doctrine event subscriber which encrypt/decrypt entities

@@ -14,12 +14,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Epsoftware\\Doctrine\\OMD\\Encrypt\\": "src"
+            "Epsoftware\\Doctrine\\ODM\\Encrypt\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Epsoftware\\Doctrine\\OMD\\Encrypt\\Tests\\": "tests"
+            "Epsoftware\\Doctrine\\ODM\\Encrypt\\Tests\\": "tests"
         }
     },
     "authors": [

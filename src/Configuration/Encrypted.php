@@ -1,6 +1,6 @@
 <?php
 
-namespace Epsoftware\Doctrine\OMD\Encrypt\Configuration;
+namespace Epsoftware\Doctrine\ODM\Encrypt\Configuration;
 
 /**
  * The Encrypted class handles the @Encrypted annotation.

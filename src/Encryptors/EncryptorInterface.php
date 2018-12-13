@@ -1,6 +1,6 @@
 <?php
 
-namespace Epsoftware\Doctrine\OMD\Encrypt\Encryptors;
+namespace Epsoftware\Doctrine\ODM\Encrypt\Encryptors;
 
 /**
  * Encryptor interface for encryptors
