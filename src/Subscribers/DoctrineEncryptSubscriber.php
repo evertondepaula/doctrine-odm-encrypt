@@ -85,7 +85,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
             $unitOfWork->recomputeSingleDocumentChangeSet($dm->getClassMetadata(get_class($document)), $document);
         }
 
-        foreach ($unitOfWork->getScheduledEntityUpdates() as $document) {
+        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
             $this->documentOnFlush($document, $dm);
             $unitOfWork->recomputeSingleDocumentChangeSet($dm->getClassMetadata(get_class($document)), $document);
         }
